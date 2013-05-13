@@ -1,0 +1,57 @@
+<a class="janrainEngage" href="#">Sign-In</a>
+<script>
+  // janrain engage
+  (function () {
+    window.janrain = window.janrain || {};
+    window.janrainWidgetOnload = function () {
+      $(document).trigger('widgets.janrain.ready');
+    };
+    $(document).ready(function () {
+      janrain.ready = true;
+    });
+    janrain.settings = {
+      tokenUrl: '<%= engage_token_url %>'
+    };
+    $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
+  })();
+
+  // backplane
+  (function () {
+    var in_backplane_channel = function (bus_name, callback) {
+      var connect = function (bus_name) {
+        Backplane(connected);
+        Backplane.init({
+          serverBaseURL: 'https://backplane1.janrainbackplane.com/v2',
+          busName: bus_name
+        });
+      }
+
+      var connected = function () {
+        var channel_id = Backplane.getChannelID();
+        if (channel_id != undefined) {
+          listen(channel_id);
+          callback(channel_id);
+        }
+      }
+
+      var listen = function (channel_id) {
+        window.escSubscription = Backplane.subscribe(function (message) {
+          console.info(message, 'message');
+          if (message.type == 'identity/login') {
+            $(document).trigger('janrain.widget.logged_in', message.messageURL);
+          }
+        });
+        Backplane.expectMessages('identity/login');
+      }
+
+      connect(bus_name);
+    }
+
+    $(document).bind('widgets.janrain.ready', function () {
+      in_backplane_channel('gree.net', function (channel_id) {
+        janrain.engage.signin.setBackplaneChannel(channel_id);
+        console.info('bind janrain widget to', channel_id);
+      });
+    });
+  })();
+</script>
