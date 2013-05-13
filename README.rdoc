@@ -3,12 +3,17 @@
 === Requirements
 
 * ruby 1.9.3+ (2.0.0 is recommended)
-* rails 4.0.0.rc1 (`gem install rails --version 4.0.0.rc1 --no-ri --no-rdoc`)
 * bundler 1.3+
+* rails 4.0.0.rc1
+
+NOTE: To install rails 4.0.0.rc1, run this command.
+
+  gem install rails --version 4.0.0.rc1 --no-ri --no-rdoc
 
 === Run
 
 Engage Widget is setup for "https://backplane.dev".
+
 Use pow (http://pow.cx/) & tunnels gem (https://github.com/jugyo/tunnels) for the domain.
 
   cd ~/.pow
