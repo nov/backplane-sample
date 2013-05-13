@@ -44,6 +44,8 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+gem 'tunnels'
+
 group :development do
   gem 'quiet_assets'
 end

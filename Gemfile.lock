@@ -36,6 +36,7 @@ GEM
       execjs
     coffee-script-source (1.6.2)
     erubis (2.7.0)
+    eventmachine (1.0.3)
     execjs (1.4.0)
       multi_json (~> 1.0)
     hike (1.2.2)
@@ -101,6 +102,8 @@ GEM
     treetop (1.4.12)
       polyglot
       polyglot (>= 0.3.1)
+    tunnels (1.2.2)
+      eventmachine
     turbolinks (1.1.1)
       coffee-rails
     tzinfo (0.3.37)
@@ -120,5 +123,6 @@ DEPENDENCIES
   sass-rails (~> 4.0.0.rc1)
   sdoc
   sqlite3
+  tunnels
   turbolinks
   uglifier (>= 1.3.0)
