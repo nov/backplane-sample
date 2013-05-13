@@ -12,7 +12,7 @@ NOTE: To install rails 4.0.0.rc1, run this command.
 
 === Run
 
-Engage Widget is setup for "https://backplane.dev".
+This app's engage widget requires "backplane.dev" domain with SSL access.
 
 Use pow (http://pow.cx/) & tunnels gem (https://github.com/jugyo/tunnels) for the domain.
 
