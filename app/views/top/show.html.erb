@@ -5,12 +5,16 @@
     window.janrain = window.janrain || {};
     window.janrainWidgetOnload = function () {
       $(document).trigger('widgets.janrain.ready');
+      janrain.events.onProviderLoginToken.addHandler(function (message) {
+        $(document).trigger('widgets.janrain.logged-in', message);
+      });
     };
     $(document).ready(function () {
       janrain.ready = true;
     });
     janrain.settings = {
-      tokenUrl: '<%= engage_token_url %>'
+      tokenUrl: '<%= engage_token_url %>',
+      tokenAction: 'event'
     };
     $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
   })();
@@ -38,7 +42,7 @@
         window.escSubscription = Backplane.subscribe(function (message) {
           console.info(message, 'message');
           if (message.type == 'identity/login') {
-            $(document).trigger('janrain.widget.logged_in', message.messageURL);
+            $(document).trigger('janrain.widget.logged-in', channel_id, message.messageURL);
           }
         });
         Backplane.expectMessages('identity/login');
@@ -47,10 +51,24 @@
       connect(bus_name);
     }
 
-    $(document).bind('widgets.janrain.ready', function () {
-      in_backplane_channel('gree.net', function (channel_id) {
+
+    in_backplane_channel('gree.net', function (channel_id) {
+      var setup_for_engage = function (channel_id) {
         janrain.engage.signin.setBackplaneChannel(channel_id);
-        console.info('bind janrain widget to', channel_id);
+        $(document).bind('widgets.janrain.logged-in', function (event, message) {
+          janrain.engage.signin.widget.refresh();
+          janrain.engage.signin.modal.close();
+          $.post('<%= engage_token_path %>', {
+            channel: channel_id,
+            token: message.token
+          }, function (response) {
+            console.info(response);
+          }, 'json');
+        });
+      };
+
+      $(document).bind('widgets.janrain.ready', function () {
+        setup_for_engage(channel_id);
       });
     });
   })();
