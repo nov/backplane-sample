@@ -1,7 +1,9 @@
 <a class="janrainEngage" href="#">Sign-In</a>
+<iframe src="https://game.backplane.dev"></iframe>
+
 <script>
   // janrain engage
-  (function () {
+  (function ($) {
     window.janrain = window.janrain || {};
     window.janrainWidgetOnload = function () {
       $(document).trigger('widgets.janrain.ready');
@@ -14,13 +16,15 @@
     });
     janrain.settings = {
       tokenUrl: '<%= engage_token_url %>',
-      tokenAction: 'event'
+      tokenAction: 'event',
+      appId: 'gree.net',
+      appUrl: 'https://gree.net.rpxnow.com'
     };
-    $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
-  })();
+    $.getScript('https://rpxnow.com/js/lib/gree.net/engage.js');
+  })(jQuery);
 
   // backplane
-  (function () {
+  (function ($) {
     var in_backplane_channel = function (bus_name, callback) {
       var connect = function (bus_name) {
         Backplane(connected);
@@ -69,5 +73,5 @@
         setup_for_engage(channel_id);
       });
     });
-  })();
+  })(jQuery);
 </script>
