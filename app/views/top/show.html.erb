@@ -16,11 +16,9 @@
     });
     janrain.settings = {
       tokenUrl: '<%= engage_token_url %>',
-      tokenAction: 'event',
-      appId: 'gree.net',
-      appUrl: 'https://gree.net.rpxnow.com'
+      tokenAction: 'event'
     };
-    $.getScript('https://rpxnow.com/js/lib/gree.net/engage.js');
+    $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
   })(jQuery);
 
   // backplane
@@ -46,7 +44,7 @@
         window.escSubscription = Backplane.subscribe(function (message) {
           console.info('message', message);
           if (message.type == 'identity/login') {
-            $(document).trigger('janrain.widget.logged-in', channel_id, message.messageURL);
+            $(document).trigger('backplane.logged-in', channel_id, message.messageURL);
           }
         });
         Backplane.expectMessages('identity/login');
