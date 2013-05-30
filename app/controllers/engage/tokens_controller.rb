@@ -1,31 +1,53 @@
 class Engage::TokensController < ApplicationController
   def create
-    engage_token = Rack::OAuth2::AccessToken::Bearer.new(access_token: params[:token])
-    # backplane_token, backplane_channel, backplane_refresh_token = cookies[:'backplane2-channel'].split(':')
-    # backplane_token = Rack::OAuth2::AccessToken::Bearer.new(access_token: backplane_token)
-    # backplane_message = {
-    #   message: {
-    #     type: 'identity/login',
-    #     sticky: false,
-    #     bus: 'gree.net',
-    #     channel: backplane_channel,
-    #     payload: {
-    #       context: 'hello'
-    #     }
-    #   }
-    # }
-    # backplane_token.post(
-    #   'https://backplane1.janrainbackplane.com/v2/message',
-    #   backplane_message.to_json,
-    #   'Content-Type' => 'application/json'
-    # )
+    profile = engage_profile_for params[:token]
+    bp_broadcast! profile
+    render json: {
+      success: true
+    }
+  end
 
-    # Janrain Engage API endpoint is not OAuth2 protected resource, I'm using Rack::OAuth2 for debugging purpose here.
-    response = engage_token.post(
+  private
+
+  def engage_profile_for(token)
+    engage_token = Rack::OAuth2::AccessToken::Bearer.new(access_token: params[:token])
+    JSON.parse engage_token.post(
       'https://rpxnow.com/api/v2/auth_info',
       apiKey: '0ecaee594408e452a2e19752c61ef19f9b38c801',
-      token: params[:token]
+      token: token
+    ).body
+  end
+
+  # NOTE: Once I got an Backplane enabled Janrain Engage account, this shouldn't be needed.
+  def bp_broadcast!(profile)
+    channel = cookies[:'backplane2-channel'].split(':')[1]
+    bp_access_token.post(
+      'https://backplane1.janrainbackplane.com/v2/message',
+      {
+        message: {
+          type: 'identity/login',
+          sticky: true,
+          bus: 'gree.net',
+          channel: channel,
+          payload: profile
+        }
+      }.to_json,
+      'Content-Type' => 'application/json'
     )
-    render json: response.body
+  end
+
+  def bp_access_token
+    client = Rack::OAuth2::Client.new(
+      identifier: 'gree_client',
+      secret: 'yaiZ5thaileiro',
+      grant_type: 'client_credentials',
+      token_endpoint: 'https://backplane1.janrainbackplane.com/v2/token'
+    )
+    client.access_token!
+    # (scope: [
+    #   'bus:bree.net',
+    #   'source:https://backplane.dev',
+    #   'type:identity/login sticky:true'
+    # ])
   end
 end

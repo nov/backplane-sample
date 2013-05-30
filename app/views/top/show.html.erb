@@ -1,5 +1,5 @@
 <a class="janrainEngage" href="#">Sign-In</a>
-<iframe src="https://game.backplane.dev"></iframe>
+<iframe id="game-widget" src="https://game.backplane.dev"></iframe>
 
 <script>
   // janrain engage
@@ -19,57 +19,66 @@
       tokenAction: 'event'
     };
     $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
+    $(document).bind('backplane.connected', function () {
+      var channel_id = Backplane.getChannelID();
+      $(document).bind('widgets.janrain.ready', function () {
+        janrain.engage.signin.setBackplaneChannel(channel_id);
+      });
+      $(document).bind('widgets.janrain.logged-in', function (event, message) {
+        janrain.engage.signin.modal.close();
+        $.post('<%= engage_token_path %>', {
+          token: message.token
+        }, function (response) {
+          // console.info('engage', response);
+        }, 'json');
+      });
+    });
+  })(jQuery);
+
+  // game
+  (function ($) {
+    var widget = $('#game-widget');
+    var widget_window = widget.get(0).contentWindow;
+    $(document).bind('backplane.connected', function (event) {
+      $(document).bind('widgets.janrain.ready', function () {
+        widget_window.postMessage({
+          type: 'backplane.connected',
+          message: $.cookie('backplane2-channel')
+        }, widget.attr('src'));
+      });
+    });
+    $(document).bind('backplane.logged-in', function (event, message) {
+      widget_window.postMessage({
+        type: 'backplane.logged-in',
+        message: message
+      }, widget.attr('src'));
+    });
   })(jQuery);
 
   // backplane
   (function ($) {
-    var in_backplane_channel = function (bus_name, callback) {
-      var connect = function (bus_name) {
-        Backplane(connected);
-        Backplane.init({
-          serverBaseURL: 'https://backplane1.janrainbackplane.com/v2',
-          busName: bus_name
-        });
-      }
-
-      var connected = function () {
-        var channel_id = Backplane.getChannelID();
-        if (channel_id != undefined) {
-          callback(channel_id);
-          listen(channel_id);
-        }
-      }
-
-      var listen = function (channel_id) {
-        window.escSubscription = Backplane.subscribe(function (message) {
-          console.info('message', message);
-          if (message.type == 'identity/login') {
-            $(document).trigger('backplane.logged-in', channel_id, message.messageURL);
-          }
-        });
-        Backplane.expectMessages('identity/login');
-      }
-
-      connect(bus_name);
-    }
-
-    in_backplane_channel('gree.net', function (channel_id) {
-      var setup_for_engage = function (channel_id) {
-        janrain.engage.signin.setBackplaneChannel(channel_id);
-        $(document).bind('widgets.janrain.logged-in', function (event, message) {
-          janrain.engage.signin.modal.close();
-          console.info('logged-in', message);
-          $.post('<%= engage_token_path %>', {
-            token: message.token
-          }, function (response) {
-            console.info(response);
-          }, 'json');
-        });
-      };
-
-      $(document).bind('widgets.janrain.ready', function () {
-        setup_for_engage(channel_id);
+    var connect = function (bus_name) {
+      Backplane(connected);
+      Backplane.init({
+        serverBaseURL: 'https://backplane1.janrainbackplane.com/v2',
+        busName: bus_name
       });
-    });
+    }
+    var connected = function () {
+      var channel_id = Backplane.getChannelID();
+      if (channel_id != undefined) {
+        $(document).trigger('backplane.connected');
+        listen();
+      }
+    }
+    var listen = function () {
+      window.escSubscription = Backplane.subscribe(function (message) {
+        if (message.type == 'identity/login') {
+          $(document).trigger('backplane.logged-in', message);
+        }
+      });
+      Backplane.expectMessages('identity/login');
+    }
+    connect('gree.net');
   })(jQuery);
 </script>

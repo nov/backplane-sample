@@ -46,6 +46,7 @@ end
 
 gem 'tunnels'
 gem 'rack-oauth2'
+gem 'url_safe_base64'
 
 group :development do
   gem 'quiet_assets'
