@@ -16,7 +16,9 @@
     });
     janrain.settings = {
       tokenUrl: '<%= engage_token_url %>',
-      tokenAction: 'event'
+      tokenAction: 'event',
+      appId: 'glhepdnkgljnndmleaec',
+      appUrl: 'https://gree.rpxnow.com'
     };
     $.getScript('https://rpxnow.com/js/lib/nov/engage.js');
     $(document).bind('backplane.connected', function () {
@@ -26,11 +28,6 @@
       });
       $(document).bind('widgets.janrain.logged-in', function (event, message) {
         janrain.engage.signin.modal.close();
-        $.post('<%= engage_token_path %>', {
-          token: message.token
-        }, function (response) {
-          // console.info('engage', response);
-        }, 'json');
       });
     });
   })(jQuery);
@@ -40,17 +37,16 @@
     var widget = $('#game-widget');
     var widget_window = widget.get(0).contentWindow;
     $(document).bind('backplane.connected', function (event) {
-      $(document).bind('widgets.janrain.ready', function () {
+      setTimeout(function () {
         widget_window.postMessage({
           type: 'backplane.connected',
           message: $.cookie('backplane2-channel')
         }, widget.attr('src'));
-      });
+      }, 500);
     });
-    $(document).bind('backplane.logged-in', function (event, message) {
+    $(document).bind('widgets.janrain.logged-in', function (event) {
       widget_window.postMessage({
-        type: 'backplane.logged-in',
-        message: message
+        type: 'widgets.janrain.logged-in'
       }, widget.attr('src'));
     });
   })(jQuery);
@@ -68,16 +64,7 @@
       var channel_id = Backplane.getChannelID();
       if (channel_id != undefined) {
         $(document).trigger('backplane.connected');
-        listen();
       }
-    }
-    var listen = function () {
-      window.escSubscription = Backplane.subscribe(function (message) {
-        if (message.type == 'identity/login') {
-          $(document).trigger('backplane.logged-in', message);
-        }
-      });
-      Backplane.expectMessages('identity/login');
     }
     connect('gree.net');
   })(jQuery);
